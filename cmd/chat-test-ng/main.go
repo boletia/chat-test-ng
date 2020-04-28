@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/boletia/chat-test-ng/pkg/bot"
-	"github.com/boletia/chat-test-ng/pkg/wsocket"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -30,14 +29,14 @@ func readConfig() (int, bot.Conf) {
 	cnf := bot.Conf{}
 	numBots := 0
 
-	flag.IntVar(&numBots, "bots", 0, "-bots=<numbots>")
-	flag.BoolVar(&cnf.SendMessages, "sendmessages", false, "-sendmessages=<true|false>")
-	flag.BoolVar(&cnf.WithGossiper, "gossiper", false, "-gossiper=<true|false>")
-	flag.StringVar(&cnf.SudDomain, "subdomain", "el-show-de-producto-online", "-subdomain=<subdomain>")
-	flag.IntVar(&cnf.NumMessages, "messages", 0, "-messages=<num_messages>")
-	flag.Int64Var(&cnf.MinDelay, "mindelay", 10, "-mindelay=<delay_in_sec>")
-	flag.Int64Var(&cnf.MaxDelay, "maxdelay", 30, "-maxdelay=<delay_in_sec>")
-	flag.StringVar(&cnf.URL, "endpoint", "wss://6vfdhz6o24.execute-api.us-east-1.amazonaws.com/beta", "-endpoint=<endpoint>")
+	flag.IntVar(&numBots, "bots", bot.DefaultNumBots, "-bots=<numbots>")
+	flag.BoolVar(&cnf.SendMessages, "sendmessages", bot.DefaultSendMessages, "-sendmessages=<true|false>")
+	flag.BoolVar(&cnf.WithGossiper, "gossiper", bot.DefaultWithGossiper, "-gossiper=<true|false>")
+	flag.StringVar(&cnf.SudDomain, "subdomain", bot.DefaultSubdomain, "-subdomain=<subdomain>")
+	flag.IntVar(&cnf.NumMessages, "messages", bot.DefaultNumMessages, "-messages=<num_messages>")
+	flag.Int64Var(&cnf.MinDelay, "mindelay", bot.DefaultMinDelay, "-mindelay=<delay_in_sec>")
+	flag.Int64Var(&cnf.MaxDelay, "maxdelay", bot.DefaultMaxDelay, "-maxdelay=<delay_in_sec>")
+	flag.StringVar(&cnf.URL, "endpoint", bot.DefautlEndPoint, "-endpoint=<endpoint>")
 	flag.Parse()
 
 	log.WithFields(log.Fields{
@@ -59,16 +58,7 @@ func launch(bots int, cnf bot.Conf) chan bool {
 
 	for i := 0; i < bots; i++ {
 		cnf.NickName = fmt.Sprintf("bot-%d", i)
-		sock, err := wsocket.New(cnf.URL)
-		if err != nil {
-			log.WithFields(log.Fields{
-				"error": err,
-				"bot":   cnf.NickName,
-			}).Error("unable to connect")
-			continue
-		}
-
-		bot := bot.New(cnf, sock, quit)
+		bot := bot.New(cnf, quit)
 		wg.Add(1)
 		go bot.Start(&wg)
 	}

@@ -34,13 +34,37 @@ func connect(url string) (*websocket.Conn, error) {
 	return conn, nil
 }
 
-func (ws wsocket) Write(msg []byte) error {
+func (ws *wsocket) Write(msg []byte) error {
+	var err error
+
 	ws.mux.Lock()
-	// write to the socket
+	err = ws.WriteMessage(websocket.TextMessage, msg)
 	ws.mux.Unlock()
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (ws wsocket) Read(*[]byte) error {
-	return nil
+func (ws *wsocket) Read(data *[]byte) error {
+	var err error
+	var msgType int
+
+	for {
+		msgType, *data, err = ws.Conn.ReadMessage()
+
+		if msgType != websocket.TextMessage {
+			continue
+		}
+
+		if err != nil {
+			return err
+		}
+
+		if len(*data) > 0 {
+			return nil
+		}
+	}
 }

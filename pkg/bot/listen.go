@@ -34,8 +34,14 @@ func (b bot) readMessage(msg chan []byte) {
 				break
 			}
 
-			if poll, isPoll := receivedMessage.(pollMessage); isPoll {
-				b.answerPoll(poll)
+			switch msgType := receivedMessage.(type) {
+			case pollMessage:
+				b.answerPoll(msgType)
+			default:
+				log.WithFields(log.Fields{
+					"bot":     b.conf.NickName,
+					"message": msgType,
+				}).Warn("read unknow message")
 			}
 		}
 	}
