@@ -14,6 +14,10 @@ import (
 var wg sync.WaitGroup
 
 func main() {
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
+
 	bots, conf := readConfig()
 	quit := launch(bots, conf)
 
@@ -34,8 +38,8 @@ func readConfig() (int, bot.Conf) {
 	flag.BoolVar(&cnf.WithGossiper, "gossiper", bot.DefaultWithGossiper, "-gossiper=<true|false>")
 	flag.StringVar(&cnf.SudDomain, "subdomain", bot.DefaultSubdomain, "-subdomain=<subdomain>")
 	flag.IntVar(&cnf.NumMessages, "messages", bot.DefaultNumMessages, "-messages=<num_messages>")
-	flag.Int64Var(&cnf.MinDelay, "mindelay", bot.DefaultMinDelay, "-mindelay=<delay_in_sec>")
-	flag.Int64Var(&cnf.MaxDelay, "maxdelay", bot.DefaultMaxDelay, "-maxdelay=<delay_in_sec>")
+	flag.IntVar(&cnf.MinDelay, "mindelay", bot.DefaultMinDelay, "-mindelay=<delay_in_sec>")
+	flag.IntVar(&cnf.MaxDelay, "maxdelay", bot.DefaultMaxDelay, "-maxdelay=<delay_in_sec>")
 	flag.StringVar(&cnf.URL, "endpoint", bot.DefautlEndPoint, "-endpoint=<endpoint>")
 	flag.Parse()
 

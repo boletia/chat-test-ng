@@ -68,3 +68,7 @@ func (ws *wsocket) Read(data *[]byte) error {
 		}
 	}
 }
+
+func (ws *wsocket) Disconnect() {
+	ws.Conn.Close()
+}

@@ -26,8 +26,8 @@ type Conf struct {
 	WithGossiper bool
 	SudDomain    string
 	NumMessages  int
-	MinDelay     int64
-	MaxDelay     int64
+	MinDelay     int
+	MaxDelay     int
 	URL          string
 }
 
@@ -35,6 +35,7 @@ type Conf struct {
 type Socket interface {
 	Write(msg []byte) error
 	Read(*[]byte) error
+	Disconnect()
 }
 
 type bot struct {

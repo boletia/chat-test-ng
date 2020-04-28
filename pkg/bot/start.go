@@ -48,6 +48,10 @@ func (b bot) Start(wg *sync.WaitGroup) {
 	go b.readMessage(msg)
 	go b.listen(msg)
 
+	if b.conf.SendMessages == true {
+		go b.chat()
+	}
+
 	for {
 		select {
 		case <-b.quit:
