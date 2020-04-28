@@ -8,7 +8,9 @@ import (
 
 type wsocket struct {
 	*websocket.Conn
-	mux sync.Mutex
+	mux        sync.Mutex
+	writtenOps int
+	readOps    int
 }
 
 // New Creates new websocket
@@ -21,6 +23,8 @@ func New(url string) (*wsocket, error) {
 	return &wsocket{
 		conn,
 		sync.Mutex{},
+		0,
+		0,
 	}, nil
 }
 
@@ -45,6 +49,7 @@ func (ws *wsocket) Write(msg []byte) error {
 		return err
 	}
 
+	ws.writtenOps++
 	return nil
 }
 
@@ -64,11 +69,13 @@ func (ws *wsocket) Read(data *[]byte) error {
 		}
 
 		if len(*data) > 0 {
+			ws.readOps++
 			return nil
 		}
 	}
 }
 
-func (ws *wsocket) Disconnect() {
-	ws.Conn.Close()
+func (ws *wsocket) CountCalls(written *int, read *int) {
+	*written = ws.writtenOps
+	*read = ws.readOps
 }

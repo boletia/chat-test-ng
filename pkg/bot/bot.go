@@ -35,7 +35,7 @@ type Conf struct {
 type Socket interface {
 	Write(msg []byte) error
 	Read(*[]byte) error
-	Disconnect()
+	CountCalls(*int, *int)
 }
 
 type bot struct {
