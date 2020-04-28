@@ -12,6 +12,7 @@ import (
 )
 
 var wg sync.WaitGroup
+var totalCalls []int
 
 func main() {
 	log.SetFormatter(&log.TextFormatter{
@@ -26,7 +27,14 @@ func main() {
 	log.WithFields(log.Fields{"bots": bots}).Info("waiting for bots")
 	wg.Wait()
 
-	log.Info("end")
+	greatTotal := 0
+	for _, call := range totalCalls {
+		greatTotal += call
+	}
+
+	log.WithFields(log.Fields{
+		"socket-operations": greatTotal,
+	}).Info("end")
 }
 
 func readConfig() (int, bot.Conf) {
@@ -59,12 +67,13 @@ func readConfig() (int, bot.Conf) {
 
 func launch(bots int, cnf bot.Conf) chan bool {
 	quit := make(chan bool)
+	totalCalls = make([]int, bots)
 
 	for i := 0; i < bots; i++ {
 		cnf.NickName = fmt.Sprintf("bot-%d", i)
 		bot := bot.New(cnf, quit)
 		wg.Add(1)
-		go bot.Start(&wg)
+		go bot.Start(&wg, &totalCalls[i])
 	}
 
 	return quit

@@ -37,7 +37,7 @@ func (b *bot) connect() bool {
 	return connected
 }
 
-func (b bot) Start(wg *sync.WaitGroup) {
+func (b bot) Start(wg *sync.WaitGroup, calls *int) {
 	defer func() {
 		wg.Done()
 	}()
@@ -60,10 +60,13 @@ func (b bot) Start(wg *sync.WaitGroup) {
 		case <-b.quit:
 			b.socket.CountCalls(&writtenOps, &readOps)
 			log.WithFields(log.Fields{
-				"bot":   b.conf.NickName,
-				"write": writtenOps,
-				"read":  readOps,
+				"bot":                b.conf.NickName,
+				"chat-messages-send": b.conf.NumMessages,
+				"write":              writtenOps,
+				"read":               readOps,
+				"total":              writtenOps + readOps,
 			}).Info("socket operations")
+			*calls = writtenOps + readOps
 
 			return
 		}
