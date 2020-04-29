@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"time"
 
 	"github.com/boletia/chat-test-ng/pkg/bot"
 	log "github.com/sirupsen/logrus"
@@ -49,6 +50,7 @@ func readConfig() (int, bot.Conf) {
 	flag.Int64Var(&cnf.MinDelay, "mindelay", bot.DefaultMinDelay, "-mindelay=<delay_in_msec>")
 	flag.Int64Var(&cnf.MaxDelay, "maxdelay", bot.DefaultMaxDelay, "-maxdelay=<delay_in_msec>")
 	flag.StringVar(&cnf.URL, "endpoint", bot.DefautlEndPoint, "-endpoint=<endpoint>")
+	flag.IntVar(&cnf.Ramping, "ramping", bot.DefaultRamping, "-ramping=<bots/sec>")
 	flag.Parse()
 
 	if (cnf.MaxDelay - cnf.MinDelay) <= 0 {
@@ -81,6 +83,7 @@ func launch(bots int, cnf bot.Conf) chan bool {
 		bot := bot.New(cnf, quit)
 		wg.Add(1)
 		go bot.Start(&wg, &totalCalls[i])
+		time.Sleep((time.Second / time.Duration(cnf.Ramping)))
 	}
 
 	return quit
