@@ -37,8 +37,10 @@ func (b *bot) connect() bool {
 	return connected
 }
 
-func (b bot) Start(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (b bot) Start(wg *sync.WaitGroup, calls *int) {
+	defer func() {
+		wg.Done()
+	}()
 
 	if !b.connect() || !b.JoinChat() {
 		return
@@ -48,9 +50,24 @@ func (b bot) Start(wg *sync.WaitGroup) {
 	go b.readMessage(msg)
 	go b.listen(msg)
 
+	if b.conf.SendMessages == true {
+		go b.chat()
+	}
+
+	var writtenOps, readOps int
 	for {
 		select {
 		case <-b.quit:
+			b.socket.CountCalls(&writtenOps, &readOps)
+			log.WithFields(log.Fields{
+				"bot":                b.conf.NickName,
+				"chat-messages-send": b.conf.NumMessages,
+				"write":              writtenOps,
+				"read":               readOps,
+				"total":              writtenOps + readOps,
+			}).Info("socket operations")
+			*calls = writtenOps + readOps
+
 			return
 		}
 	}

@@ -34,9 +34,35 @@ func (b bot) readMessage(msg chan []byte) {
 				break
 			}
 
-			if poll, isPoll := receivedMessage.(pollMessage); isPoll {
-				b.answerPoll(poll)
+			if data, isValid := receivedMessage.(map[string]interface{}); isValid {
+				for key, value := range data {
+					if key == "action" {
+						switch value {
+						case "channelChatStreamMessage":
+							b.readChat(data)
+						default:
+							log.WithFields(log.Fields{
+								"bot":    b.conf.NickName,
+								"action": value,
+							}).Warn("read unknow message")
+						}
+					}
+				}
 			}
+			/*
+				switch msgType := receivedMessage.(type) {
+				case pollMessage:
+					b.answerPoll(msgType)
+				case chatStreamMessage:
+					b.readChat(msgType)
+				default:
+					log.WithFields(log.Fields{
+						"bot":  b.conf.NickName,
+						"type": fmt.Sprintf("%T", msgType),
+						"data": fmt.Sprintf("%#v", msgType),
+					}).Warn("read unknow message")
+				}
+			*/
 		}
 	}
 }

@@ -9,6 +9,7 @@ import (
 const (
 	joinChatAction   = "channelStreamJoinUser"
 	joinChatActionV2 = "channelStreamJoinUserV2"
+	joinChatActionV3 = "v1/users/channel/subscribe"
 )
 
 type joinChannelData struct {
@@ -24,7 +25,7 @@ type joinChannel struct {
 
 func (b bot) JoinChat() bool {
 	joinChat := joinChannel{
-		Action: joinChatActionV2,
+		Action: joinChatActionV3,
 		Data: joinChannelData{
 			EventSubdomain: b.conf.SudDomain,
 			NickName:       b.conf.NickName,
