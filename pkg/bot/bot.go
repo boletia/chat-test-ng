@@ -17,6 +17,8 @@ const (
 	DefaultSubdomain = "rob-test-event"
 	// DefautlEndPoint where we have to connect
 	DefautlEndPoint = "wss://7qbaj6pufe.execute-api.us-east-1.amazonaws.com/beta"
+	// DefaultRamping number of bots/sec
+	DefaultRamping = 10
 )
 
 // Conf Depic new bot configuration
@@ -26,9 +28,10 @@ type Conf struct {
 	WithGossiper bool
 	SudDomain    string
 	NumMessages  int
-	MinDelay     int
-	MaxDelay     int
+	MinDelay     int64
+	MaxDelay     int64
 	URL          string
+	Ramping      int
 }
 
 // Socket interface to send/receive messages
