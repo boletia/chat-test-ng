@@ -1,4 +1,3 @@
 *.code-workspace
-build
 build/*
 reports
