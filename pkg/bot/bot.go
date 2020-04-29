@@ -26,8 +26,8 @@ type Conf struct {
 	WithGossiper bool
 	SudDomain    string
 	NumMessages  int
-	MinDelay     int
-	MaxDelay     int
+	MinDelay     int64
+	MaxDelay     int64
 	URL          string
 }
 

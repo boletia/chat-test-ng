@@ -28,8 +28,8 @@ type chatMessage struct {
 func (b bot) chat() {
 	for msgCount := 1; msgCount <= b.conf.NumMessages; msgCount++ {
 
-		latency := rand.Intn(b.conf.MaxDelay-b.conf.MinDelay) + b.conf.MinDelay
-		time.Sleep(time.Duration(latency) * time.Second)
+		latency := rand.Int63n(b.conf.MaxDelay-b.conf.MinDelay) + b.conf.MinDelay
+		time.Sleep(time.Duration(latency) * time.Millisecond)
 
 		msg := chatMessage{
 			Action: chatActionV1,

@@ -46,10 +46,17 @@ func readConfig() (int, bot.Conf) {
 	flag.BoolVar(&cnf.WithGossiper, "gossiper", bot.DefaultWithGossiper, "-gossiper=<true|false>")
 	flag.StringVar(&cnf.SudDomain, "subdomain", bot.DefaultSubdomain, "-subdomain=<subdomain>")
 	flag.IntVar(&cnf.NumMessages, "messages", bot.DefaultNumMessages, "-messages=<num_messages>")
-	flag.IntVar(&cnf.MinDelay, "mindelay", bot.DefaultMinDelay, "-mindelay=<delay_in_sec>")
-	flag.IntVar(&cnf.MaxDelay, "maxdelay", bot.DefaultMaxDelay, "-maxdelay=<delay_in_sec>")
+	flag.Int64Var(&cnf.MinDelay, "mindelay", bot.DefaultMinDelay, "-mindelay=<delay_in_msec>")
+	flag.Int64Var(&cnf.MaxDelay, "maxdelay", bot.DefaultMaxDelay, "-maxdelay=<delay_in_msec>")
 	flag.StringVar(&cnf.URL, "endpoint", bot.DefautlEndPoint, "-endpoint=<endpoint>")
 	flag.Parse()
+
+	if (cnf.MaxDelay - cnf.MinDelay) <= 0 {
+		log.WithFields(log.Fields{
+			"min": cnf.MinDelay,
+			"max": cnf.MaxDelay,
+		}).Fatal("bad delay numbers")
+	}
 
 	log.WithFields(log.Fields{
 		"bots":         numBots,
