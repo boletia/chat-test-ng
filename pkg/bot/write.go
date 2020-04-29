@@ -41,7 +41,12 @@ func (b bot) chat() {
 		}
 
 		if msgByte, err := json.Marshal(msg); err == nil {
-			b.socket.Write(msgByte)
+			if err := b.socket.Write(msgByte); err != nil {
+				log.WithFields(log.Fields{
+					"error": err,
+					"bot":   b.conf.NickName,
+				}).Error("unable to send chat message")
+			}
 		} else {
 			log.WithFields(log.Fields{
 				"error": err,
