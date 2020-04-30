@@ -25,8 +25,12 @@ func (b bot) readMessage(msg chan []byte) {
 	for {
 		select {
 		case data := <-msg:
-			var receivedMessage interface{}
-			if err := json.Unmarshal(data, &receivedMessage); err != nil {
+			msgType := struct {
+				Action string      `json:"action"`
+				Data   interface{} `json:"-"`
+			}{}
+
+			if err := json.Unmarshal(data, &msgType); err != nil {
 				log.WithFields(log.Fields{
 					"bot":   b.conf.NickName,
 					"error": err,
@@ -34,21 +38,18 @@ func (b bot) readMessage(msg chan []byte) {
 				break
 			}
 
-			if data, isValid := receivedMessage.(map[string]interface{}); isValid {
-				for key, value := range data {
-					if key == "action" {
-						switch value {
-						case "channelChatStreamMessage":
-							b.readChat(data)
-						default:
-							log.WithFields(log.Fields{
-								"bot":    b.conf.NickName,
-								"action": value,
-							}).Warn("read unknow message")
-						}
-					}
-				}
+			switch msgType.Action {
+			case "channelChatStreamMessage":
+				b.readChat(data)
+			case "channelPollStream":
+				b.answerPoll(data)
+			default:
+				log.WithFields(log.Fields{
+					"bot": b.conf.NickName,
+					"msg": string(data),
+				}).Warn("unknow message")
 			}
+
 			/*
 				switch msgType := receivedMessage.(type) {
 				case pollMessage:
