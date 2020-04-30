@@ -18,6 +18,7 @@ type chatMessageData struct {
 	NickName       string `json:"nickname"`
 	Message        string `json:"message"`
 	EventSubdomain string `json:"event_subdomain"`
+	Avatar         string `json:"avatar"`
 }
 
 type chatMessage struct {
@@ -37,6 +38,7 @@ func (b bot) chat() {
 				NickName:       b.conf.NickName,
 				Message:        fmt.Sprintf("Message %d of %d, latency %d", msgCount, b.conf.NumMessages, latency),
 				EventSubdomain: b.conf.SudDomain,
+				Avatar:         "bot-1",
 			},
 		}
 

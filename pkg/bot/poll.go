@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const emitVote = "channelPollUserOnVote"
+const emitVote = "v1/poll/vote"
 
 type pollAnswer struct {
 	ID     string `json:"id"`
@@ -38,29 +38,53 @@ type pollVote struct {
 	Data   pollVoteData `json:"data"`
 }
 
-func (b bot) answerPoll(poll pollMessage) {
-	choice := rand.Intn(len(poll.Data.Answers))
+func (b bot) answerPoll(pollMsg []byte) {
+	poll := pollMessage{}
+
+	if err := json.Unmarshal(pollMsg, &poll); err != nil {
+		log.WithFields(log.Fields{
+			"bot":   b.conf.NickName,
+			"error": err,
+		}).Error("json unmarshaling poll message")
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"bot":     b.conf.NickName,
+		"poll":    poll.Data.Name,
+		"options": poll.Data.Answers,
+	}).Info("poll message")
+
+	optionAnswer := rand.Intn(len(poll.Data.Answers))
 
 	vote := pollVote{
 		Action: emitVote,
 		Data: pollVoteData{
 			PollID: poll.Data.PollID,
-			Answer: poll.Data.Answers[choice].ID,
+			Answer: poll.Data.Answers[optionAnswer].ID,
 		},
 	}
 
-	if voteData, err := json.Marshal(vote); err != nil {
+	if voteMsg, err := json.Marshal(vote); err != nil {
 		log.WithFields(log.Fields{
 			"bot":   b.conf.NickName,
 			"poll":  poll.Data.Name,
 			"error": err,
-		}).Error("unable to answer poll")
+		}).Error("json marshaling pollvote message")
 	} else {
-		if err := b.socket.Write(voteData); err != nil {
+		if b.socket.Write(voteMsg) != nil {
 			log.WithFields(log.Fields{
 				"bot":   b.conf.NickName,
+				"poll":  poll.Data.Name,
 				"error": err,
-			}).Error("socket write error")
+			}).Error("unable to emmit poll vote message")
+		} else {
+			log.WithFields(log.Fields{
+				"bot":    b.conf.NickName,
+				"poll":   poll.Data.Name,
+				"answer": poll.Data.Answers[optionAnswer].Option,
+			}).Info("poll answer send")
+
 		}
 	}
 }
