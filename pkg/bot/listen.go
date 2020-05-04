@@ -25,7 +25,7 @@ func (b bot) readMessage(msg chan []byte) {
 	for {
 		select {
 		case data := <-msg:
-			msgType := struct {
+			msgType := []struct {
 				Action string      `json:"action"`
 				Data   interface{} `json:"-"`
 			}{}
@@ -38,16 +38,20 @@ func (b bot) readMessage(msg chan []byte) {
 				break
 			}
 
-			switch msgType.Action {
-			case "channelChatStreamMessage":
-				b.readChat(data)
-			case "channelPollStream":
-				b.answerPoll(data)
-			default:
-				log.WithFields(log.Fields{
-					"bot": b.conf.NickName,
-					"msg": string(data),
-				}).Warn("unknow message")
+			for _, mType := range msgType {
+				if mData, ok := mType.Data.([]byte); ok {
+					switch mType.Action {
+					case "channelChatStreamMessage":
+						b.readChat(mData)
+					case "channelPollStream":
+						b.answerPoll(mData)
+					default:
+						log.WithFields(log.Fields{
+							"bot": b.conf.NickName,
+							"msg": string(mData),
+						}).Warn("unknow message")
+					}
+				}
 			}
 
 			/*
