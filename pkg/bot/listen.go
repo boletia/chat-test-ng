@@ -25,9 +25,9 @@ func (b bot) readMessage(msg chan []byte) {
 	for {
 		select {
 		case data := <-msg:
-			msgType := []struct {
-				Action string      `json:"action"`
-				Data   interface{} `json:"-"`
+			msgType := struct {
+				Action string                  `json:"action"`
+				Data   []chatStreamMessageData `json:"data"`
 			}{}
 
 			if err := json.Unmarshal(data, &msgType); err != nil {
@@ -38,36 +38,17 @@ func (b bot) readMessage(msg chan []byte) {
 				break
 			}
 
-			for _, mType := range msgType {
-				if mData, ok := mType.Data.([]byte); ok {
-					switch mType.Action {
-					case "channelChatStreamMessage":
-						b.readChat(mData)
-					case "channelPollStream":
-						b.answerPoll(mData)
-					default:
-						log.WithFields(log.Fields{
-							"bot": b.conf.NickName,
-							"msg": string(mData),
-						}).Warn("unknow message")
-					}
-				}
+			switch msgType.Action {
+			case "channelChatStreamMessage":
+				b.readChat(msgType.Data)
+			case "channelPollStream":
+				b.answerPoll(data)
+			default:
+				log.WithFields(log.Fields{
+					"bot": b.conf.NickName,
+					"msg": string(data),
+				}).Warn("unknow message")
 			}
-
-			/*
-				switch msgType := receivedMessage.(type) {
-				case pollMessage:
-					b.answerPoll(msgType)
-				case chatStreamMessage:
-					b.readChat(msgType)
-				default:
-					log.WithFields(log.Fields{
-						"bot":  b.conf.NickName,
-						"type": fmt.Sprintf("%T", msgType),
-						"data": fmt.Sprintf("%#v", msgType),
-					}).Warn("read unknow message")
-				}
-			*/
 		}
 	}
 }

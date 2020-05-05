@@ -1,8 +1,6 @@
 package bot
 
 import (
-	"encoding/json"
-
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,20 +16,20 @@ type chatStreamMessage struct {
 	Data   chatStreamMessageData `json:"data"`
 }
 
-func (b bot) readChat(chatMsg []byte) {
-	chat := chatStreamMessage{}
+func (b bot) readChat(chatMsgIface interface{}) {
 
-	if err := json.Unmarshal(chatMsg, &chat); err != nil {
+	if chatMsg, ok := chatMsgIface.([]chatStreamMessageData); ok {
+		for _, chat := range chatMsg {
+			log.WithFields(log.Fields{
+				"bot":  b.conf.NickName,
+				"from": chat.Author,
+				"msg":  chat.Message,
+			}).Info("chat read")
+		}
+	} else {
 		log.WithFields(log.Fields{
-			"bot":   b.conf.NickName,
-			"error": err,
-		}).Error("json unmarshaling chat message")
-		return
+			"bot":  b.conf.NickName,
+			"data": chatMsgIface,
+		}).Error("chat read error")
 	}
-
-	log.WithFields(log.Fields{
-		"bot":  b.conf.NickName,
-		"from": chat.Data.Author,
-		"msg":  chat.Data.Message,
-	}).Info("chat read")
 }
