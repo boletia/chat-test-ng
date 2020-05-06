@@ -39,6 +39,7 @@ func (b *bot) connect() bool {
 
 func (b bot) Start(wg *sync.WaitGroup, calls *int) {
 	defer func() {
+		//b.socket.CloseSocket()
 		wg.Done()
 	}()
 
@@ -58,6 +59,13 @@ func (b bot) Start(wg *sync.WaitGroup, calls *int) {
 	for {
 		select {
 		case <-b.quit:
+			if err := b.socket.SendCloseMessage(time.Now().Add(5 * time.Second)); err != nil {
+				log.WithFields(log.Fields{
+					"bot":   b.conf.NickName,
+					"error": err,
+				}).Error("error sending SendCloseMessage")
+			}
+
 			b.socket.CountCalls(&writtenOps, &readOps)
 			log.WithFields(log.Fields{
 				"bot":                b.conf.NickName,

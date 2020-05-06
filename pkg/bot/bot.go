@@ -1,5 +1,7 @@
 package bot
 
+import "time"
+
 const (
 	// DefaultNumBots default bots
 	DefaultNumBots = 1
@@ -40,6 +42,8 @@ type Socket interface {
 	Write(msg []byte) error
 	Read(*[]byte) error
 	CountCalls(*int, *int)
+	SendCloseMessage(time.Time) error
+	CloseSocket() bool
 }
 
 type bot struct {
