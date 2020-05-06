@@ -19,12 +19,14 @@ type chatStreamMessage struct {
 func (b bot) readChat(chatMsgIface interface{}) {
 
 	if chatMsg, ok := chatMsgIface.([]chatStreamMessageData); ok {
-		for _, chat := range chatMsg {
-			log.WithFields(log.Fields{
-				"bot":  b.conf.NickName,
-				"from": chat.Author,
-				"msg":  chat.Message,
-			}).Info("chat read")
+		if !b.conf.OnlyError {
+			for _, chat := range chatMsg {
+				log.WithFields(log.Fields{
+					"bot":  b.conf.NickName,
+					"from": chat.Author,
+					"msg":  chat.Message,
+				}).Info("chat read")
+			}
 		}
 	} else {
 		log.WithFields(log.Fields{

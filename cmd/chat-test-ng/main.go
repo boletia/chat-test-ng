@@ -51,6 +51,7 @@ func readConfig() (int, bot.Conf) {
 	flag.Int64Var(&cnf.MaxDelay, "maxdelay", bot.DefaultMaxDelay, "-maxdelay=<delay_in_msec>")
 	flag.StringVar(&cnf.URL, "endpoint", bot.DefautlEndPoint, "-endpoint=<endpoint>")
 	flag.IntVar(&cnf.Ramping, "ramping", bot.DefaultRamping, "-ramping=<bots/sec>")
+	flag.BoolVar(&cnf.OnlyError, "onlyerrors", false, "-onlyerrors=<true|false>")
 	flag.Parse()
 
 	if (cnf.MaxDelay - cnf.MinDelay) <= 0 {
@@ -69,6 +70,7 @@ func readConfig() (int, bot.Conf) {
 		"mindelay":     cnf.MinDelay,
 		"maxdelay":     cnf.MaxDelay,
 		"endpoint":     cnf.URL,
+		"onlyerrors":   cnf.OnlyError,
 	}).Info("read params")
 
 	return numBots, cnf

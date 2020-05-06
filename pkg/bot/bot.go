@@ -1,5 +1,7 @@
 package bot
 
+import "time"
+
 const (
 	// DefaultNumBots default bots
 	DefaultNumBots = 1
@@ -8,9 +10,9 @@ const (
 	// DefaultNumMessages Number of messages to send
 	DefaultNumMessages = 0
 	// DefaultMinDelay minumum of latency between messages
-	DefaultMinDelay = 10
+	DefaultMinDelay = 1000
 	// DefaultMaxDelay minumum of latency between messages
-	DefaultMaxDelay = 30
+	DefaultMaxDelay = 5000
 	// DefaultWithGossiper default to false
 	DefaultWithGossiper = false
 	// DefaultSubdomain subdomain to join
@@ -32,6 +34,7 @@ type Conf struct {
 	MaxDelay     int64
 	URL          string
 	Ramping      int
+	OnlyError    bool
 }
 
 // Socket interface to send/receive messages
@@ -39,6 +42,8 @@ type Socket interface {
 	Write(msg []byte) error
 	Read(*[]byte) error
 	CountCalls(*int, *int)
+	SendCloseMessage(time.Time) error
+	CloseSocket() bool
 }
 
 type bot struct {

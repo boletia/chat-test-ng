@@ -2,6 +2,7 @@ package wsocket
 
 import (
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -59,13 +60,12 @@ func (ws *wsocket) Read(data *[]byte) error {
 
 	for {
 		msgType, *data, err = ws.Conn.ReadMessage()
+		if err != nil {
+			return err
+		}
 
 		if msgType != websocket.TextMessage {
 			continue
-		}
-
-		if err != nil {
-			return err
 		}
 
 		if len(*data) > 0 {
@@ -78,4 +78,14 @@ func (ws *wsocket) Read(data *[]byte) error {
 func (ws *wsocket) CountCalls(written *int, read *int) {
 	*written = ws.writtenOps
 	*read = ws.readOps
+}
+
+func (ws *wsocket) SendCloseMessage(deadLine time.Time) error {
+	err := ws.WriteControl(websocket.CloseMessage, nil, deadLine)
+
+	return err
+}
+
+func (ws *wsocket) CloseSocket() bool {
+	return (ws.Conn.Close() == nil)
 }
