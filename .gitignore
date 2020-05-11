@@ -1,3 +1,4 @@
 *.code-workspace
 build/*
 reports
+init.sh
