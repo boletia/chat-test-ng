@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/boletia/chat-test-ng/pkg/bot"
+	"github.com/boletia/chat-test-ng/pkg/dynamo"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -52,6 +53,7 @@ func readConfig() (int, bot.Conf) {
 	flag.StringVar(&cnf.URL, "endpoint", bot.DefautlEndPoint, "-endpoint=<endpoint>")
 	flag.IntVar(&cnf.Ramping, "ramping", bot.DefaultRamping, "-ramping=<bots/sec>")
 	flag.BoolVar(&cnf.OnlyError, "onlyerrors", false, "-onlyerrors=<true|false>")
+	flag.BoolVar(&cnf.Sent2Dynamo, "send2dynamo", false, "-send2dynamo=<true|false>")
 	flag.Parse()
 
 	if (cnf.MaxDelay - cnf.MinDelay) <= 0 {
@@ -71,18 +73,26 @@ func readConfig() (int, bot.Conf) {
 		"maxdelay":     cnf.MaxDelay,
 		"endpoint":     cnf.URL,
 		"onlyerrors":   cnf.OnlyError,
+		"send2dynamo":  cnf.Sent2Dynamo,
 	}).Info("read params")
 
 	return numBots, cnf
 }
 
 func launch(bots int, cnf bot.Conf) chan bool {
+	var dyDB dynamo.DyDB
+
 	quit := make(chan bool)
 	totalCalls = make([]int, bots)
+
+	if cnf.Sent2Dynamo {
+		dyDB = dynamo.New()
+	}
 
 	for i := 0; i < bots; i++ {
 		cnf.NickName = fmt.Sprintf("bot-%d", i)
 		bot := bot.New(cnf, quit)
+		bot.AddDynamo(dyDB)
 		wg.Add(1)
 		go bot.Start(&wg, &totalCalls[i])
 		time.Sleep((time.Second / time.Duration(cnf.Ramping)))

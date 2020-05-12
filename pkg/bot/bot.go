@@ -35,6 +35,7 @@ type Conf struct {
 	URL          string
 	Ramping      int
 	OnlyError    bool
+	Sent2Dynamo  bool
 }
 
 // Socket interface to send/receive messages
@@ -46,8 +47,14 @@ type Socket interface {
 	CloseSocket() bool
 }
 
+// Dynamo interface to send messages to dynamo
+type Dynamo interface {
+	Write(msg []byte) error
+}
+
 type bot struct {
 	socket Socket
+	dynamo Dynamo
 	conf   Conf
 	quit   chan bool
 }
@@ -56,7 +63,12 @@ type bot struct {
 func New(cnf Conf, quick chan bool) bot {
 	return bot{
 		socket: nil,
+		dynamo: nil,
 		conf:   cnf,
 		quit:   quick,
 	}
+}
+
+func (b *bot) AddDynamo(dy Dynamo) {
+	b.dynamo = dy
 }

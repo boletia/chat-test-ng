@@ -14,6 +14,12 @@ const (
 	chatActionV1 = "v1/chat/message"
 )
 
+type handlerWritter func(msg []byte) error
+
+type writter interface {
+	Write(msg []byte) error
+}
+
 type chatMessageData struct {
 	NickName       string `json:"nickname"`
 	Message        string `json:"message"`
@@ -27,6 +33,15 @@ type chatMessage struct {
 }
 
 func (b bot) chat() {
+	var fWritter handlerWritter
+
+	if b.conf.Sent2Dynamo {
+		fWritter = b.dynamo.Write
+	} else {
+		fWritter = b.socket.Write
+	}
+
+	timestamp := time.Now()
 	for msgCount := 1; msgCount <= b.conf.NumMessages; msgCount++ {
 
 		latency := rand.Int63n(b.conf.MaxDelay-b.conf.MinDelay) + b.conf.MinDelay
@@ -43,11 +58,11 @@ func (b bot) chat() {
 		}
 
 		if msgByte, err := json.Marshal(msg); err == nil {
-			if err := b.socket.Write(msgByte); err != nil {
+			if err := fWritter(msgByte); err != nil {
 				log.WithFields(log.Fields{
 					"error": err,
 					"bot":   b.conf.NickName,
-				}).Error("unable to send chat message")
+				}).Error("unable to send message")
 			}
 		} else {
 			log.WithFields(log.Fields{
@@ -59,6 +74,16 @@ func (b bot) chat() {
 	}
 
 	log.WithFields(log.Fields{
-		"bot": b.conf.NickName,
+		"bot":        b.conf.NickName,
+		"epalseTime": time.Since(timestamp),
 	}).Info("has send all its messages")
+}
+
+func (b bot) writeMessage(w writter, msg []byte) {
+	if err := w.Write(msg); err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+			"bot":   b.conf.NickName,
+		}).Error("unable to send chat message")
+	}
 }
