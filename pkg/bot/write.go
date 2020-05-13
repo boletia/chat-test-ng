@@ -43,8 +43,13 @@ func (b bot) chat() {
 
 	timestamp := time.Now()
 	for msgCount := 1; msgCount <= b.conf.NumMessages; msgCount++ {
+		var latency int64
 
-		latency := rand.Int63n(b.conf.MaxDelay-b.conf.MinDelay) + b.conf.MinDelay
+		if b.conf.MinDelay == b.conf.MaxDelay {
+			latency = b.conf.MinDelay
+		} else {
+			latency = rand.Int63n(b.conf.MaxDelay-b.conf.MinDelay) + b.conf.MinDelay
+		}
 		time.Sleep(time.Duration(latency) * time.Millisecond)
 
 		msg := chatMessage{
