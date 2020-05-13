@@ -58,11 +58,22 @@ func (b bot) chat() {
 		}
 
 		if msgByte, err := json.Marshal(msg); err == nil {
-			if err := fWritter(msgByte); err != nil {
-				log.WithFields(log.Fields{
-					"error": err,
-					"bot":   b.conf.NickName,
-				}).Error("unable to send message")
+			if !b.conf.Sent2Dynamo {
+				if err := fWritter(msgByte); err != nil {
+					log.WithFields(log.Fields{
+						"error": err,
+						"bot":   b.conf.NickName,
+					}).Error("unable to send message")
+				}
+			} else {
+				go func() {
+					if err := fWritter(msgByte); err != nil {
+						log.WithFields(log.Fields{
+							"error": err,
+							"bot":   b.conf.NickName,
+						}).Error("unable to send message")
+					}
+				}()
 			}
 		} else {
 			log.WithFields(log.Fields{
