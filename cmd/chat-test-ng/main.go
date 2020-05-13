@@ -56,7 +56,7 @@ func readConfig() (int, bot.Conf) {
 	flag.BoolVar(&cnf.Sent2Dynamo, "send2dynamo", false, "-send2dynamo=<true|false>")
 	flag.Parse()
 
-	if (cnf.MaxDelay - cnf.MinDelay) <= 0 {
+	if (cnf.MaxDelay - cnf.MinDelay) < 0 {
 		log.WithFields(log.Fields{
 			"min": cnf.MinDelay,
 			"max": cnf.MaxDelay,
@@ -74,6 +74,7 @@ func readConfig() (int, bot.Conf) {
 		"endpoint":     cnf.URL,
 		"onlyerrors":   cnf.OnlyError,
 		"send2dynamo":  cnf.Sent2Dynamo,
+		"ramping":      cnf.Ramping,
 	}).Info("read params")
 
 	return numBots, cnf
