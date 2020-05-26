@@ -50,6 +50,7 @@ func (b bot) Start(wg *sync.WaitGroup, calls *int) {
 	msg := make(chan []byte)
 	go b.readMessage(msg)
 	go b.listen(msg)
+	go (&b).printMsgsSumary()
 
 	if b.conf.SendMessages == true {
 		go b.chat()
