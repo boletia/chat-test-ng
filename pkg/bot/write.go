@@ -69,6 +69,8 @@ func (b bot) chat() {
 						"error": err,
 						"bot":   b.conf.NickName,
 					}).Error("unable to send message")
+				} else {
+					b.addCountMsgSent()
 				}
 			} else {
 				go func() {
@@ -77,6 +79,8 @@ func (b bot) chat() {
 							"error": err,
 							"bot":   b.conf.NickName,
 						}).Error("unable to send message")
+					} else {
+						b.addCountMsgSent()
 					}
 				}()
 			}
