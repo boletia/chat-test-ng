@@ -65,6 +65,7 @@ type bot struct {
 	conf         Conf
 	quit         chan bool
 	rcvdMessages *uint64
+	summaryCount *uint64
 }
 
 // New Creates new bot instance
@@ -75,6 +76,7 @@ func New(cnf Conf, quick chan bool) bot {
 		conf:         cnf,
 		quit:         quick,
 		rcvdMessages: new(uint64),
+		summaryCount: new(uint64),
 	}
 }
 
@@ -101,7 +103,9 @@ func (b bot) printMsgsSumary() {
 				"bot":        b.conf.NickName,
 				"messages":   *b.rcvdMessages,
 				"sleep_time": b.conf.SecondsToReport,
+				"iteration":  *b.summaryCount,
 			}).Info("msg received")
+			*b.summaryCount++
 		}
 	}
 }
