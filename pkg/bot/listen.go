@@ -41,6 +41,7 @@ func (b bot) readMessage(msg chan []byte) {
 			switch msgType.Action {
 			case "channelChatStreamMessage":
 				b.readChat(msgType.Data)
+				b.addCountMsgReceived()
 			case "channelPollStream":
 				b.answerPoll(data)
 			default:
