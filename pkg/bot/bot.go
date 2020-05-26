@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"fmt"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -65,6 +66,7 @@ type bot struct {
 	conf         Conf
 	quit         chan bool
 	rcvdMessages *uint64
+	sendMessages *uint64
 	summaryCount *uint64
 }
 
@@ -76,6 +78,7 @@ func New(cnf Conf, quick chan bool) bot {
 		conf:         cnf,
 		quit:         quick,
 		rcvdMessages: new(uint64),
+		sendMessages: new(uint64),
 		summaryCount: new(uint64),
 	}
 }
@@ -86,6 +89,10 @@ func (b *bot) AddDynamo(dy Dynamo) {
 
 func (b bot) addCountMsgReceived() {
 	*b.rcvdMessages = *b.rcvdMessages + 1
+}
+
+func (b bot) addCountMsgSent() {
+	*b.sendMessages = *b.sendMessages + 1
 }
 
 func (b bot) printMsgsSumary() {
@@ -100,10 +107,11 @@ func (b bot) printMsgsSumary() {
 		default:
 			time.Sleep(time.Second * time.Duration(b.conf.SecondsToReport))
 			log.WithFields(log.Fields{
-				"bot":        b.conf.NickName,
-				"messages":   *b.rcvdMessages,
-				"sleep_time": b.conf.SecondsToReport,
-				"iteration":  *b.summaryCount,
+				"bot":           b.conf.NickName,
+				"rcvd_messages": *b.rcvdMessages,
+				"sent_messages": fmt.Sprintf("%d/%d", *b.sendMessages, b.conf.NumMessages),
+				"sleep_time":    b.conf.SecondsToReport,
+				"iteration":     *b.summaryCount,
 			}).Info("msg received")
 			*b.summaryCount++
 		}

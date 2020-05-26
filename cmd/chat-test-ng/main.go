@@ -66,17 +66,19 @@ func readConfig() (int, bot.Conf) {
 	}
 
 	log.WithFields(log.Fields{
-		"bots":         numBots,
-		"sendmessages": cnf.SendMessages,
-		"gossiper":     cnf.WithGossiper,
-		"subdomain":    cnf.SudDomain,
-		"messages":     cnf.NumMessages,
-		"mindelay":     cnf.MinDelay,
-		"maxdelay":     cnf.MaxDelay,
-		"endpoint":     cnf.URL,
-		"onlyerrors":   cnf.OnlyError,
-		"send2dynamo":  cnf.Sent2Dynamo,
-		"ramping":      cnf.Ramping,
+		"bots":            numBots,
+		"sendmessages":    cnf.SendMessages,
+		"gossiper":        cnf.WithGossiper,
+		"subdomain":       cnf.SudDomain,
+		"messages":        cnf.NumMessages,
+		"mindelay":        cnf.MinDelay,
+		"maxdelay":        cnf.MaxDelay,
+		"endpoint":        cnf.URL,
+		"onlyerrors":      cnf.OnlyError,
+		"send2dynamo":     cnf.Sent2Dynamo,
+		"ramping":         cnf.Ramping,
+		"nick":            cnf.NickName,
+		"secondstoreport": cnf.SecondsToReport,
 	}).Info("read params")
 
 	return numBots, cnf
