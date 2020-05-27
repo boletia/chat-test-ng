@@ -46,6 +46,10 @@ type Conf struct {
 	SecondsToReport uint64
 }
 
+type count struct {
+	read bool
+}
+
 // Socket interface to send/receive messages
 type Socket interface {
 	Write(msg []byte) error
@@ -87,12 +91,17 @@ func (b *bot) AddDynamo(dy Dynamo) {
 	b.dynamo = dy
 }
 
-func (b bot) addCountMsgReceived() {
-	*b.rcvdMessages = *b.rcvdMessages + 1
-}
-
-func (b bot) addCountMsgSent() {
-	*b.sendMessages = *b.sendMessages + 1
+func (b bot) messageCounter(event chan count) {
+	for {
+		select {
+		case msg := <-event:
+			if msg.read {
+				*b.rcvdMessages++
+			} else {
+				*b.sendMessages++
+			}
+		}
+	}
 }
 
 func (b bot) printMsgsSumary() {

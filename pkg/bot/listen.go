@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (b bot) listen(msg chan []byte) {
+func (b bot) listen(msg chan []byte, counter chan count) {
 	for {
 		var data []byte
 		if err := b.socket.Read(&data); err != nil {
@@ -18,6 +18,9 @@ func (b bot) listen(msg chan []byte) {
 		}
 
 		msg <- data
+		counter <- count{
+			read: true,
+		}
 	}
 }
 
@@ -41,7 +44,6 @@ func (b bot) readMessage(msg chan []byte) {
 			switch msgType.Action {
 			case "channelChatStreamMessage":
 				b.readChat(msgType.Data)
-				b.addCountMsgReceived()
 			case "channelPollStream":
 				b.answerPoll(data)
 			default:
