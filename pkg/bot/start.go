@@ -47,13 +47,16 @@ func (b bot) Start(wg *sync.WaitGroup, calls *int) {
 		return
 	}
 
+	go b.printMsgsSumary()
+	count := make(chan count, 100)
+	go b.messageCounter(count)
+
 	msg := make(chan []byte)
 	go b.readMessage(msg)
-	go b.listen(msg)
-	go (&b).printMsgsSumary()
+	go b.listen(msg, count)
 
 	if b.conf.SendMessages == true {
-		go b.chat()
+		go b.chat(count)
 	}
 
 	var writtenOps, readOps int

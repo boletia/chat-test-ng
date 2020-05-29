@@ -32,7 +32,7 @@ type chatMessage struct {
 	Data   chatMessageData `json:"data"`
 }
 
-func (b bot) chat() {
+func (b bot) chat(counter chan count) {
 	var fWritter handlerWritter
 
 	if b.conf.Sent2Dynamo {
@@ -70,7 +70,9 @@ func (b bot) chat() {
 						"bot":   b.conf.NickName,
 					}).Error("unable to send message")
 				} else {
-					b.addCountMsgSent()
+					counter <- count{
+						read: false,
+					}
 				}
 			} else {
 				go func() {
@@ -80,7 +82,9 @@ func (b bot) chat() {
 							"bot":   b.conf.NickName,
 						}).Error("unable to send message")
 					} else {
-						b.addCountMsgSent()
+						counter <- count{
+							read: false,
+						}
 					}
 				}()
 			}
