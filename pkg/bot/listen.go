@@ -17,7 +17,9 @@ func (b bot) listen(msg chan []byte, counter chan count) {
 			return
 		}
 
-		msg <- data
+		if b.conf.Decode {
+			msg <- data
+		}
 		counter <- count{
 			read: true,
 		}

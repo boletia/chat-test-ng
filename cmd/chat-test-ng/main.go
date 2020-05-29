@@ -56,6 +56,7 @@ func readConfig() (int, bot.Conf) {
 	flag.BoolVar(&cnf.Sent2Dynamo, "send2dynamo", false, "-send2dynamo=<true|false>")
 	flag.StringVar(&cnf.NickName, "nick", "bot", "-nick=<string>")
 	flag.Uint64Var(&cnf.SecondsToReport, "secondstoreport", bot.DefaultSecondsToReport, "-secondstoreport=<seconds>")
+	flag.BoolVar(&cnf.Decode, "decode", bot.DefaultDecode, "-decode=<true|false>")
 	flag.Parse()
 
 	if (cnf.MaxDelay - cnf.MinDelay) < 0 {
@@ -79,6 +80,7 @@ func readConfig() (int, bot.Conf) {
 		"ramping":         cnf.Ramping,
 		"nick":            cnf.NickName,
 		"secondstoreport": cnf.SecondsToReport,
+		"decode":          cnf.Decode,
 	}).Info("read params")
 
 	return numBots, cnf

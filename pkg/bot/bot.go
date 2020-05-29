@@ -28,6 +28,8 @@ const (
 	DefaultRamping = 10
 	// DefaultSecondsToReport sleep time before reports
 	DefaultSecondsToReport = 10
+	// DefaultDecode decode income messages
+	DefaultDecode = false
 )
 
 // Conf Depic new bot configuration
@@ -44,6 +46,7 @@ type Conf struct {
 	OnlyError       bool
 	Sent2Dynamo     bool
 	SecondsToReport uint64
+	Decode          bool
 }
 
 type count struct {
