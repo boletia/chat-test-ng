@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -28,6 +29,10 @@ const (
 	DefaultRamping = 10
 	// DefaultSecondsToReport sleep time before reports
 	DefaultSecondsToReport = 10
+	// DefaultLogMessagesFile path to directory to store messages
+	DefaultLogMessagesFile = "/tmp/"
+	// DefaultWriteLog we have to write to log file
+	DefaultWriteLog = false
 )
 
 // Conf Depic new bot configuration
@@ -44,6 +49,9 @@ type Conf struct {
 	OnlyError       bool
 	Sent2Dynamo     bool
 	SecondsToReport uint64
+	LogMessagesFile string
+	DecodeMsgs      bool
+	WriteToLog      bool
 }
 
 type count struct {
@@ -65,26 +73,39 @@ type Dynamo interface {
 }
 
 type bot struct {
-	socket       Socket
-	dynamo       Dynamo
-	conf         Conf
-	quit         chan bool
-	rcvdMessages *uint64
-	sendMessages *uint64
-	summaryCount *uint64
+	socket          Socket
+	dynamo          Dynamo
+	conf            Conf
+	quit            chan bool
+	rcvdMessages    *uint64
+	sendMessages    *uint64
+	summaryCount    *uint64
+	FileMessagesLog *os.File
 }
 
 // New Creates new bot instance
-func New(cnf Conf, quick chan bool) bot {
-	return bot{
-		socket:       nil,
-		dynamo:       nil,
-		conf:         cnf,
-		quit:         quick,
-		rcvdMessages: new(uint64),
-		sendMessages: new(uint64),
-		summaryCount: new(uint64),
+func New(cnf Conf, quick chan bool) (bot, error) {
+	path := fmt.Sprintf("%s/%s.txt", cnf.LogMessagesFile, cnf.NickName)
+	var f *os.File
+	var err error
+
+	if cnf.WriteToLog {
+		f, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			return bot{}, err
+		}
 	}
+
+	return bot{
+		socket:          nil,
+		dynamo:          nil,
+		conf:            cnf,
+		quit:            quick,
+		rcvdMessages:    new(uint64),
+		sendMessages:    new(uint64),
+		summaryCount:    new(uint64),
+		FileMessagesLog: f,
+	}, nil
 }
 
 func (b *bot) AddDynamo(dy Dynamo) {

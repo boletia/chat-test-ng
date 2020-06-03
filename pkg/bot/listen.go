@@ -2,6 +2,8 @@ package bot
 
 import (
 	"encoding/json"
+	"fmt"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -16,8 +18,16 @@ func (b bot) listen(msg chan []byte, counter chan count) {
 			}).Error("socket read error")
 			return
 		}
+		t := time.Now()
 
-		msg <- data
+		if b.conf.DecodeMsgs {
+			msg <- data
+		} else {
+			if b.conf.WriteToLog {
+				b.FileMessagesLog.WriteString(fmt.Sprintf("%s#%s\n", t.String(), string(data)))
+			}
+		}
+
 		counter <- count{
 			read: true,
 		}
