@@ -40,6 +40,7 @@ func (b *bot) connect() bool {
 func (b bot) Start(wg *sync.WaitGroup, calls *int) {
 	defer func() {
 		//b.socket.CloseSocket()
+		b.msgFile.Close()
 		wg.Done()
 	}()
 

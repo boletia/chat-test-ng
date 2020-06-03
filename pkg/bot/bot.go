@@ -2,8 +2,10 @@ package bot
 
 import (
 	"fmt"
+	"os"
 	"time"
 
+	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -30,6 +32,8 @@ const (
 	DefaultSecondsToReport = 10
 	// DefaultDecode decode income messages
 	DefaultDecode = false
+	// DefatultFilePath path for income messages
+	DefatultFilePath = "/mnt/chatlog/"
 )
 
 // Conf Depic new bot configuration
@@ -47,6 +51,7 @@ type Conf struct {
 	Sent2Dynamo     bool
 	SecondsToReport uint64
 	Decode          bool
+	FilePath        string
 }
 
 type count struct {
@@ -60,6 +65,7 @@ type Socket interface {
 	CountCalls(*int, *int)
 	SendCloseMessage(time.Time) error
 	CloseSocket() bool
+	GetSocket() *websocket.Conn
 }
 
 // Dynamo interface to send messages to dynamo
@@ -75,10 +81,17 @@ type bot struct {
 	rcvdMessages *uint64
 	sendMessages *uint64
 	summaryCount *uint64
+	msgFile      *os.File
 }
 
 // New Creates new bot instance
-func New(cnf Conf, quick chan bool) bot {
+func New(cnf Conf, quick chan bool) (bot, error) {
+
+	f, err := os.OpenFile(fmt.Sprintf("%s-%s.txt", cnf.FilePath, cnf.NickName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return bot{}, err
+	}
+
 	return bot{
 		socket:       nil,
 		dynamo:       nil,
@@ -87,7 +100,8 @@ func New(cnf Conf, quick chan bool) bot {
 		rcvdMessages: new(uint64),
 		sendMessages: new(uint64),
 		summaryCount: new(uint64),
-	}
+		msgFile:      f,
+	}, nil
 }
 
 func (b *bot) AddDynamo(dy Dynamo) {

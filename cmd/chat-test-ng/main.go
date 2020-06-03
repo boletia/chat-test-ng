@@ -57,6 +57,7 @@ func readConfig() (int, bot.Conf) {
 	flag.StringVar(&cnf.NickName, "nick", "bot", "-nick=<string>")
 	flag.Uint64Var(&cnf.SecondsToReport, "secondstoreport", bot.DefaultSecondsToReport, "-secondstoreport=<seconds>")
 	flag.BoolVar(&cnf.Decode, "decode", bot.DefaultDecode, "-decode=<true|false>")
+	flag.StringVar(&cnf.FilePath, "filepath", bot.DefatultFilePath, "-filepath=<path>")
 	flag.Parse()
 
 	if (cnf.MaxDelay - cnf.MinDelay) < 0 {
@@ -81,6 +82,7 @@ func readConfig() (int, bot.Conf) {
 		"nick":            cnf.NickName,
 		"secondstoreport": cnf.SecondsToReport,
 		"decode":          cnf.Decode,
+		"filepath":        cnf.FilePath,
 	}).Info("read params")
 
 	return numBots, cnf
@@ -98,7 +100,11 @@ func launch(bots int, cnf bot.Conf) chan bool {
 
 	for i := 0; i < bots; i++ {
 		cnf.NickName = fmt.Sprintf("bot-%d", i)
-		bot := bot.New(cnf, quit)
+		bot, err := bot.New(cnf, quit)
+		if err != nil {
+			log.Fatalf("unable to launch bots", err)
+		}
+
 		bot.AddDynamo(dyDB)
 		wg.Add(1)
 		go bot.Start(&wg, &totalCalls[i])

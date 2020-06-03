@@ -3,29 +3,48 @@ package bot
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 
+	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
 
 func (b bot) listen(msg chan []byte, counter chan count) {
+	sock := b.socket.GetSocket()
+
 	for {
-		var data []byte
-		if err := b.socket.Read(&data); err != nil {
-			log.WithFields(log.Fields{
-				"bot":   b.conf.NickName,
-				"error": err,
-			}).Error("socket read error")
+		data := make([]byte, 0)
+		msgType, reader, err := sock.NextReader()
+		if err != nil {
 			return
+		}
+
+		if msgType != websocket.TextMessage {
+			continue
+		}
+
+		buf := make([]byte, 0)
+		for {
+			_, err := reader.Read(buf)
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				return
+			}
+			data = append(data, buf[:]...)
 		}
 
 		if b.conf.Decode {
 			msg <- data
 		} else {
-			fmt.Printf("%s\n", string(data))
+			b.msgFile.WriteString(fmt.Sprintf("%s:%s\n", b.conf.NickName, string(data)))
 		}
+
 		counter <- count{
 			read: true,
 		}
+		data = nil
 	}
 }
 

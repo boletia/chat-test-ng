@@ -89,3 +89,7 @@ func (ws *wsocket) SendCloseMessage(deadLine time.Time) error {
 func (ws *wsocket) CloseSocket() bool {
 	return (ws.Conn.Close() == nil)
 }
+
+func (ws *wsocket) GetSocket() *websocket.Conn {
+	return ws.Conn
+}
