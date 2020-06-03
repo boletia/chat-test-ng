@@ -2,6 +2,7 @@ package bot
 
 import (
 	"encoding/json"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -19,6 +20,8 @@ func (b bot) listen(msg chan []byte, counter chan count) {
 
 		if b.conf.Decode {
 			msg <- data
+		} else {
+			fmt.Printf("%s\n", string(data))
 		}
 		counter <- count{
 			read: true,
