@@ -55,7 +55,10 @@ func readConfig() (int, bot.Conf) {
 	flag.BoolVar(&cnf.OnlyError, "onlyerrors", false, "-onlyerrors=<true|false>")
 	flag.BoolVar(&cnf.Sent2Dynamo, "send2dynamo", false, "-send2dynamo=<true|false>")
 	flag.StringVar(&cnf.NickName, "nick", "bot", "-nick=<string>")
+	flag.StringVar(&cnf.LogMessagesFile, "file", bot.DefaultLogMessagesFile, "-file=<string>")
 	flag.Uint64Var(&cnf.SecondsToReport, "secondstoreport", bot.DefaultSecondsToReport, "-secondstoreport=<seconds>")
+	flag.BoolVar(&cnf.DecodeMsgs, "decode", false, "-decode=<true|false>")
+	flag.BoolVar(&cnf.WriteToLog, "writelog", false, "-writelog=<true|false>")
 	flag.Parse()
 
 	if (cnf.MaxDelay - cnf.MinDelay) < 0 {
@@ -79,6 +82,8 @@ func readConfig() (int, bot.Conf) {
 		"ramping":         cnf.Ramping,
 		"nick":            cnf.NickName,
 		"secondstoreport": cnf.SecondsToReport,
+		"file":            cnf.LogMessagesFile,
+		"witelog":         cnf.WriteToLog,
 	}).Info("read params")
 
 	return numBots, cnf
@@ -95,8 +100,13 @@ func launch(bots int, cnf bot.Conf) chan bool {
 	}
 
 	for i := 0; i < bots; i++ {
-		cnf.NickName = fmt.Sprintf("bot-%d", i)
-		bot := bot.New(cnf, quit)
+		botCnf := cnf
+		botCnf.NickName += fmt.Sprintf("bot-%d", i)
+
+		bot, err := bot.New(botCnf, quit)
+		if err != nil {
+			log.Fatal("No fue posible abrir el archivo de log")
+		}
 		bot.AddDynamo(dyDB)
 		wg.Add(1)
 		go bot.Start(&wg, &totalCalls[i])
