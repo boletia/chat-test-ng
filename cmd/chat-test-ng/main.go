@@ -51,6 +51,7 @@ func readConfig() (int, bot.Conf) {
 	flag.Int64Var(&cnf.MinDelay, "mindelay", bot.DefaultMinDelay, "-mindelay=<delay_in_msec>")
 	flag.Int64Var(&cnf.MaxDelay, "maxdelay", bot.DefaultMaxDelay, "-maxdelay=<delay_in_msec>")
 	flag.StringVar(&cnf.URL, "endpoint", bot.DefautlEndPoint, "-endpoint=<endpoint>")
+	flag.StringVar(&cnf.URLWsapi, "wsapi", bot.DefaultWsapiEndPoint, "-wsapi=<endpoint>")
 	flag.IntVar(&cnf.Ramping, "ramping", bot.DefaultRamping, "-ramping=<bots/sec>")
 	flag.BoolVar(&cnf.OnlyError, "onlyerrors", false, "-onlyerrors=<true|false>")
 	flag.BoolVar(&cnf.Sent2Dynamo, "send2dynamo", false, "-send2dynamo=<true|false>")
@@ -74,6 +75,7 @@ func readConfig() (int, bot.Conf) {
 		"mindelay":        cnf.MinDelay,
 		"maxdelay":        cnf.MaxDelay,
 		"endpoint":        cnf.URL,
+		"wsapi-endpoint":  cnf.URLWsapi,
 		"onlyerrors":      cnf.OnlyError,
 		"send2dynamo":     cnf.Sent2Dynamo,
 		"ramping":         cnf.Ramping,

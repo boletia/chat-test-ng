@@ -12,7 +12,7 @@ import (
 
 var (
 	awsRegion   = "us-east-1"
-	dynamoTable = "streaming-chat-cognito-test"
+	dynamoTable = "streaming-chat-event"
 )
 
 // DyDB dynamo db handler
