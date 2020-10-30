@@ -21,9 +21,11 @@ const (
 	// DefaultWithGossiper default to false
 	DefaultWithGossiper = false
 	// DefaultSubdomain subdomain to join
-	DefaultSubdomain = "rob-test-event"
+	DefaultSubdomain = "neermetv-test"
 	// DefautlEndPoint where we have to connect
-	DefautlEndPoint = "wss://7qbaj6pufe.execute-api.us-east-1.amazonaws.com/beta"
+	DefautlEndPoint = "wss://chat.neerme.io:81/"
+	// DefaultWsapiEndPoint endpoint to send second join
+	DefaultWsapiEndPoint = "wss://wsapi.neerme.io/"
 	// DefaultRamping number of bots/sec
 	DefaultRamping = 10
 	// DefaultSecondsToReport sleep time before reports
@@ -40,6 +42,7 @@ type Conf struct {
 	MinDelay        int64
 	MaxDelay        int64
 	URL             string
+	URLWsapi        string
 	Ramping         int
 	OnlyError       bool
 	Sent2Dynamo     bool
@@ -65,25 +68,27 @@ type Dynamo interface {
 }
 
 type bot struct {
-	socket       Socket
-	dynamo       Dynamo
-	conf         Conf
-	quit         chan bool
-	rcvdMessages *uint64
-	sendMessages *uint64
-	summaryCount *uint64
+	socket           Socket
+	apiGateWaySocket Socket
+	dynamo           Dynamo
+	conf             Conf
+	quit             chan bool
+	rcvdMessages     *uint64
+	sendMessages     *uint64
+	summaryCount     *uint64
 }
 
 // New Creates new bot instance
 func New(cnf Conf, quick chan bool) bot {
 	return bot{
-		socket:       nil,
-		dynamo:       nil,
-		conf:         cnf,
-		quit:         quick,
-		rcvdMessages: new(uint64),
-		sendMessages: new(uint64),
-		summaryCount: new(uint64),
+		socket:           nil,
+		apiGateWaySocket: nil,
+		dynamo:           nil,
+		conf:             cnf,
+		quit:             quick,
+		rcvdMessages:     new(uint64),
+		sendMessages:     new(uint64),
+		summaryCount:     new(uint64),
 	}
 }
 

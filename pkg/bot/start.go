@@ -22,7 +22,16 @@ func (b *bot) connect() bool {
 		}
 	}()
 
-	wsocket, err := wsocket.New(b.conf.URL)
+	chatSocket, err := wsocket.New(b.conf.URL)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"bot": b.conf.NickName,
+			"url": b.conf.URL,
+		}).Error("unable to connect bot")
+		return connected
+	}
+
+	wsapiSocket, err := wsocket.New(b.conf.URLWsapi)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"bot": b.conf.NickName,
@@ -32,7 +41,8 @@ func (b *bot) connect() bool {
 	}
 
 	connected = true
-	b.socket = wsocket
+	b.socket = chatSocket
+	b.apiGateWaySocket = wsapiSocket
 
 	return connected
 }
